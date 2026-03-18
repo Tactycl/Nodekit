@@ -111,6 +111,14 @@ function Director:getAbsoluteWinSize()
 	return self:getWinSize() * self:getScale()
 end
 
+function Director:getCursorPosition()
+	return self.root:getCursorPosition()
+end
+
+function Director:getCursorPositionScaled()
+	return self.root:getCursorPositionScaled()
+end
+
 function Director:getGuiInset()
 	return GuiService:GetGuiInset()
 end

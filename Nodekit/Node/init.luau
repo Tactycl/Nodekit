@@ -1,4 +1,8 @@
 local CollectionService = game:GetService("CollectionService")
+local Players = game:GetService("Players")
+
+local LocalPlayer = Players.LocalPlayer
+local Mouse = LocalPlayer:GetMouse()
 
 local enterSubtree = require("./util/enterSubtree")
 local exitSubtree = require("./util/exitSubtree")
@@ -169,6 +173,21 @@ end
 
 function Node:getRblxInstance()
 	return self._instance
+end
+
+function Node:getCursorPosition()
+	local cursorPos = Vector2.new(Mouse.X, Mouse.Y)
+	if typeof(self.getAbsolutePosition) ~= "function" then
+		return cursorPos
+	end
+	return cursorPos - self:getAbsolutePosition()
+end
+
+function Node:getCursorPositionScaled()
+	if typeof(self.getAbsoluteSize) ~= "function" then
+		return Vector2.new(1, 1)
+	end
+	return self:getCursorPosition() / self:getAbsoluteSize()
 end
 
 function Node:addTag(tag: string)
