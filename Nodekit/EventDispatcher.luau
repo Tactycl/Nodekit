@@ -94,6 +94,7 @@ local function handleNode(self, node, event)
 
 	if node._dispatchEvent then
 		node:_dispatchEvent(event)
+		
 	elseif typeof(node.onEvent) == "function" then
 		node:onEvent(event)
 	end
@@ -146,7 +147,7 @@ local function resolveInputPosition(self, input)
 	return UserInputService:GetMouseLocation()
 end
 
-local function makePayload(self, input, processed, pos, wasButtonPressed, pointerId)
+local function makePayload(input, processed, pos, wasButtonPressed, pointerId)
 	return {
 		input = input,
 		gameProcessed = processed,
@@ -312,13 +313,13 @@ function EventDispatcher:bindUserInput()
 				dispatchDirect(
 					self,
 					hit,
-					Event:create("PointerBegan", makePayload(self, input, gp, pos, false, pointerId))
+					Event:create("PointerBegan", makePayload(input, gp, pos, false, pointerId))
 				)
 				pointerSent = true
 			end
 		end
 
-		handleNode(self, scene, Event:create("InputBegan", makePayload(self, input, gp, pos, pointerSent, pointerId)))
+		dispatchDownTree(self, scene, Event:create("InputBegan", makePayload(input, gp, pos, pointerSent, pointerId)))
 	end)
 
 	self._conns[#self._conns + 1] = UserInputService.InputChanged:Connect(function(input, gp)
@@ -351,12 +352,12 @@ function EventDispatcher:bindUserInput()
 			dispatchDirect(
 				self,
 				hit,
-				Event:create("PointerChanged", makePayload(self, input, gp, pos, false, pointerId))
+				Event:create("PointerChanged", makePayload(input, gp, pos, false, pointerId))
 			)
 			pointerSent = true
 		end
 
-		handleNode(self, scene, Event:create("InputChanged", makePayload(self, input, gp, pos, pointerSent, pointerId)))
+		dispatchDownTree(self, scene, Event:create("InputChanged", makePayload(input, gp, pos, pointerSent, pointerId)))
 	end)
 
 	self._conns[#self._conns + 1] = UserInputService.InputEnded:Connect(function(input, gp)
@@ -384,7 +385,7 @@ function EventDispatcher:bindUserInput()
 				dispatchDirect(
 					self,
 					hit,
-					Event:create("PointerEnded", makePayload(self, input, gp, pos, false, pointerId))
+					Event:create("PointerEnded", makePayload(input, gp, pos, false, pointerId))
 				)
 				pointerSent = true
 			end
@@ -393,7 +394,7 @@ function EventDispatcher:bindUserInput()
 				dispatchDirect(
 					self,
 					hit,
-					Event:create("PointerClick", makePayload(self, input, gp, pos, false, pointerId))
+					Event:create("PointerClick", makePayload(input, gp, pos, false, pointerId))
 				)
 				pointerSent = true
 			end
@@ -402,7 +403,7 @@ function EventDispatcher:bindUserInput()
 			self._hoverNodes[pointerId] = nil
 		end
 
-		handleNode(self, scene, Event:create("InputEnded", makePayload(self, input, gp, pos, pointerSent, pointerId)))
+		dispatchDownTree(self, scene, Event:create("InputEnded", makePayload(input, gp, pos, pointerSent, pointerId)))
 	end)
 
 	return self
