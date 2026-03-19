@@ -94,8 +94,12 @@ local function attachToParent(childNode, parentNode, zIndex: number?)
 	walk(childNode)
 end
 
+local function getName(self)
+	return ("%s<%s>"):format(self._id or "Unnamed", self._type or "?")
+end
+
 local function updateInstanceName(self)
-	self._instance.Name = ("%s<%s>"):format(self._id or "Unnamed", self._type or "?")
+	self._instance.Name = getName(self)
 end
 
 local Node = {}
@@ -245,6 +249,10 @@ end
 
 function Node:getId()
 	return self._id
+end
+
+function Node:getName()
+	return getName(self)
 end
 
 function Node:setType(t: string)
