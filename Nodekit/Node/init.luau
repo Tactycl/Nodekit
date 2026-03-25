@@ -13,6 +13,25 @@ local NodeRegistry = require("@self/NodeRegistry")
 local Tween = require("@self/Tween")
 local Action = require("@self/Action")
 
+local function getName(self)
+	local rblxInstance = self._instance
+	local typeName = (self._type ~= nil and self._type ~= self._BASE_TYPE) and `{self._BASE_TYPE}::{self._type}` or self._BASE_TYPE
+	local id = self._id
+	local order = rblxInstance:IsA("GuiObject") and rblxInstance.LayoutOrder or "0"
+	local childrenCount = #self._children
+
+	local name = id ~= nil and `{typeName} "{id}"` or typeName
+	if childrenCount > 0 then
+		name ..= ` <{childrenCount}>`
+	end
+	
+	return `[{order}] {name}`
+end
+
+local function updateInstanceName(self)
+	self._instance.Name = getName(self)
+end
+
 local function normalizeGuiSiblingOrder(parentNode)
 	if not parentNode then
 		return
@@ -24,8 +43,11 @@ local function normalizeGuiSiblingOrder(parentNode)
 			if childNode._BASE_TYPE == baseType then
 				local inst = childNode._instance
 				if inst and inst:IsA("GuiObject") then
-					inst.ZIndex = z
-					inst.LayoutOrder = z
+					if inst.ZIndex ~= z or inst.LayoutOrder ~= z then
+						inst.ZIndex = z
+						inst.LayoutOrder = z
+						updateInstanceName(childNode)
+					end
 					z += 1
 				end
 			end
@@ -65,6 +87,7 @@ local function detachFromOldParent(childNode)
 	childNode._instance.Parent = nil
 
 	normalizeGuiSiblingOrder(oldParent)
+	updateInstanceName(oldParent)
 	safeCall(oldParent, "onChildRemoved", childNode)
 
 	return oldParent
@@ -76,12 +99,14 @@ local function attachToParent(childNode, parentNode, zIndex: number?)
 
 	if zIndex == nil then
 		table.insert(parentNode._children, childNode)
+
 	else
 		local idx = clampInsertIndex(zIndex, #parentNode._children)
 		table.insert(parentNode._children, idx, childNode)
 	end
 
 	normalizeGuiSiblingOrder(parentNode)
+	updateInstanceName(parentNode)
 	safeCall(parentNode, "onChildAdded", childNode)
 
 	local function walk(node)
@@ -92,14 +117,6 @@ local function attachToParent(childNode, parentNode, zIndex: number?)
 	end
 
 	walk(childNode)
-end
-
-local function getName(self)
-	return ("%s<%s>"):format(self._id or "Unnamed", self._type or "?")
-end
-
-local function updateInstanceName(self)
-	self._instance.Name = getName(self)
 end
 
 local Node = {}
