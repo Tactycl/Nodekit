@@ -72,30 +72,26 @@ end
 
 local function rebuildRenderList(self)
 	local list = {}
+	local children = self._children
 
-	local function walk(node)
-		local children = node._children
-		if not children then
-			return
-		end
+	if not children then
+		self._renderList = list
+		self._renderListDirty = false
+		return
+	end
 
-		for i = #ZINDEX_ORDERING_PRIORITY, 1, -1 do
-			local baseType = ZINDEX_ORDERING_PRIORITY[i]
+	for i = #ZINDEX_ORDERING_PRIORITY, 1, -1 do
+		local baseType = ZINDEX_ORDERING_PRIORITY[i]
 
-			for j = 1, #children do
-				local child = children[j]
-				if child._BASE_TYPE == baseType then
-					walk(child)
-
-					if child._instance and child._instance:IsA("GuiObject") then
-						table.insert(list, 1, child)
-					end
+		for j = 1, #children do
+			local child = children[j]
+			if child._BASE_TYPE == baseType then
+				if child._instance and child._instance:IsA("GuiObject") then
+					table.insert(list, 1, child)
 				end
 			end
 		end
 	end
-
-	walk(self)
 
 	self._renderList = list
 	self._renderListDirty = false
