@@ -105,7 +105,7 @@ local function dispatchDirect(self, node, event)
 	return event
 end
 
-local function findTopmostAt(root, pos) -- TODO
+local function findTopmostAt(root, pos)
 	local function walk(node)
 		local renderList = node:getRenderList()
 		if renderList then
