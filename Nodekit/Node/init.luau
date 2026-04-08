@@ -1,8 +1,5 @@
 local CollectionService = game:GetService("CollectionService")
-local Players = game:GetService("Players")
-
-local LocalPlayer = Players.LocalPlayer
-local Mouse = LocalPlayer:GetMouse()
+local UserInputService = game:GetService("UserInputService")
 
 local enterSubtree = require("./util/enterSubtree")
 local exitSubtree = require("./util/exitSubtree")
@@ -12,6 +9,12 @@ local NodeTypes = require("@self/NodeTypes")
 local NodeRegistry = require("@self/NodeRegistry")
 local Tween = require("@self/Tween")
 local Action = require("@self/Action")
+
+local ZINDEX_ORDERING_PRIORITY = {
+	"Node",
+	"Layer",
+	"Scene",
+}
 
 local function getName(self)
 	local rblxInstance = self._instance
@@ -30,6 +33,13 @@ end
 
 local function updateInstanceName(self)
 	self._instance.Name = getName(self)
+end
+
+local function markRenderDirty(node)
+	while node do
+		node._renderListDirty = true
+		node = node._parent
+	end
 end
 
 local function normalizeGuiSiblingOrder(parentNode)
@@ -54,9 +64,41 @@ local function normalizeGuiSiblingOrder(parentNode)
 		end
 	end
 
-	apply("Scene")
-	apply("Layer")
-	apply("Node")
+	for i = #ZINDEX_ORDERING_PRIORITY, 1, -1 do
+		apply(ZINDEX_ORDERING_PRIORITY[i])
+	end
+	markRenderDirty(parentNode)
+end
+
+local function rebuildRenderList(self)
+	local list = {}
+
+	local function walk(node)
+		local children = node._children
+		if not children then
+			return
+		end
+
+		for i = #ZINDEX_ORDERING_PRIORITY, 1, -1 do
+			local baseType = ZINDEX_ORDERING_PRIORITY[i]
+
+			for j = 1, #children do
+				local child = children[j]
+				if child._BASE_TYPE == baseType then
+					walk(child)
+
+					if child._instance and child._instance:IsA("GuiObject") then
+						table.insert(list, 1, child)
+					end
+				end
+			end
+		end
+	end
+
+	walk(self)
+
+	self._renderList = list
+	self._renderListDirty = false
 end
 
 local function clampInsertIndex(zIndex: number, len: number): number
@@ -133,6 +175,8 @@ Node.__index = function(self, key)
 
 	if key:sub(1, 3) == "set" then
 		local propName = key:sub(4)
+		assert(self._metaWriteable[propName] ~= nil or self._metaVirtualWriteable[propName] ~= nil, `{propName} is not a valid member of {getName(self)}`)
+
 		if self._metaWriteable[propName] then
 			return function(self, v)
 				if typeof(self._instance[propName]) == typeof(v) then
@@ -140,6 +184,7 @@ Node.__index = function(self, key)
 				end
 				return self
 			end
+
 		elseif self._metaVirtualWriteable[propName] then
 			return function(self, v)
 				self._metaVirtualWriteable[propName](self, v)
@@ -148,12 +193,16 @@ Node.__index = function(self, key)
 				return self
 			end
 		end
+
 	elseif key:sub(1, 3) == "get" then
 		local propName = key:sub(4)
+		assert(self._metaReadable[propName] ~= nil or self._metaVirtualReadable[propName] ~= nil, `{propName} is not a valid member of {getName(self)}`)
+
 		if self._metaReadable[propName] then
 			return function(self)
 				return self._instance[propName]
 			end
+
 		elseif self._metaVirtualReadable[propName] then
 			return function(self)
 				return self._metaVirtualReadable[propName](self)
@@ -197,7 +246,7 @@ function Node:getRblxInstance()
 end
 
 function Node:getCursorPosition()
-	local cursorPos = Vector2.new(Mouse.X, Mouse.Y)
+	local cursorPos = UserInputService:GetMouseLocation()
 	if typeof(self.getAbsolutePosition) ~= "function" then
 		return cursorPos
 	end
@@ -454,6 +503,13 @@ function Node:clearAllChildren()
 	return self
 end
 
+function Node:getRenderList()
+	if self._renderListDirty or not self._renderList then
+		rebuildRenderList(self)
+	end
+	return self._renderList
+end
+
 function Node:_trackTween(tween)
 	if not self._activeTweens then
 		self._activeTweens = {}
@@ -596,6 +652,9 @@ NodeTypes:init(function(className)
 	self._children = {}
 	self._tags = {}
 	self._attributes = {}
+
+	self._renderList = nil
+	self._renderListDirty = true
 
 	NodeRegistry.register(self)
 	updateInstanceName(self)

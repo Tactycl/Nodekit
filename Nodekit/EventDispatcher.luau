@@ -1,4 +1,5 @@
 local UserInputService = game:GetService("UserInputService")
+
 local Event = require("./Event")
 
 local EventDispatcher = {}
@@ -46,10 +47,7 @@ local function isPressInput(input)
 end
 
 local function getPointerId(input)
-	if input.UserInputType == Enum.UserInputType.Touch then
-		return input
-	end
-	return "mouse1"
+	return input
 end
 
 local function isPointerEventType(t)
@@ -107,10 +105,10 @@ local function dispatchDirect(self, node, event)
 	return event
 end
 
-local function findTopmostAt(root, pos)
+local function findTopmostAt(root, pos) -- TODO
 	local function walk(node)
-		local children = node._children
-		if children then
+		local renderList = node:getRenderList()
+		if renderList then
 			if canCullByParentBounds(node) then
 				local inst = node._instance
 				if inst and inst:IsA("GuiObject") and not pointInGui(inst, pos) then
@@ -118,12 +116,13 @@ local function findTopmostAt(root, pos)
 				end
 			end
 
-			for i = #children, 1, -1 do
-				local child = children[i]
+			for i = 1, #renderList do
+				local child = renderList[i]
 				local hit = walk(child)
 				if hit then
 					return hit
 				end
+				
 				if isBlockingLayer(child) then
 					return nil
 				end
@@ -241,41 +240,32 @@ local function dispatchWheel(self, pos, delta)
 	return false
 end
 
-local function dispatchDownTree(self, root, event, selfPriority)
+local function dispatchDownTree(self, root, event)
 	if not root or not event then
 		return event
 	end
 
 	local function walk(node)
+		handleNode(self, node, event)
+
+		if typeof(event.isConsumed) == "function" and event:isConsumed() then
+			return true
+		end
+
+		if isBlockingLayer(node) then
+			return true
+		end
+
 		local children = node._children
 		if children then
-			for i = #children, 1, -1 do
-				local child = children[i]
-				walk(child)
-
-				if event.isConsumed and typeof(event.isConsumed) == "function" and event:isConsumed() then
-					return
-				end
-
-				if isBlockingLayer(child) then
-					return
+			for _, childNode in children do
+				if walk(childNode) then
+					return true
 				end
 			end
 		end
 
-		handleNode(self, node, event)
-	end
-
-	if selfPriority then
-		handleNode(self, root, event)
-
-		if event.isConsumed and typeof(event.isConsumed) == "function" and event:isConsumed() then
-			return event
-		end
-
-		if isBlockingLayer(root) then
-			return event
-		end
+		return false
 	end
 
 	walk(root)
@@ -330,7 +320,7 @@ function EventDispatcher:bindUserInput()
 			end
 		end
 
-		dispatchDownTree(self, scene, Event:create("InputBegan", makePayload(input, gp, pos, pointerSent, pointerId)), true)
+		dispatchDownTree(self, scene, Event:create("InputBegan", makePayload(input, gp, pos, pointerSent, pointerId)))
 	end)
 
 	self._conns[#self._conns + 1] = UserInputService.InputChanged:Connect(function(input, gp)
@@ -368,7 +358,7 @@ function EventDispatcher:bindUserInput()
 			pointerSent = true
 		end
 
-		dispatchDownTree(self, scene, Event:create("InputChanged", makePayload(input, gp, pos, pointerSent, pointerId)), true)
+		dispatchDownTree(self, scene, Event:create("InputChanged", makePayload(input, gp, pos, pointerSent, pointerId)))
 	end)
 
 	self._conns[#self._conns + 1] = UserInputService.InputEnded:Connect(function(input, gp)
@@ -414,7 +404,7 @@ function EventDispatcher:bindUserInput()
 			self._hoverNodes[pointerId] = nil
 		end
 
-		dispatchDownTree(self, scene, Event:create("InputEnded", makePayload(input, gp, pos, pointerSent, pointerId)), true)
+		dispatchDownTree(self, scene, Event:create("InputEnded", makePayload(input, gp, pos, pointerSent, pointerId)))
 	end)
 
 	return self
