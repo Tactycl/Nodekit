@@ -171,8 +171,6 @@ Node.__index = function(self, key)
 
 	if key:sub(1, 3) == "set" then
 		local propName = key:sub(4)
-		assert(self._metaWriteable[propName] ~= nil or self._metaVirtualWriteable[propName] ~= nil, `{propName} is not a valid member of {getName(self)}`)
-
 		if self._metaWriteable[propName] then
 			return function(self, v)
 				if typeof(self._instance[propName]) == typeof(v) then
@@ -192,8 +190,6 @@ Node.__index = function(self, key)
 
 	elseif key:sub(1, 3) == "get" then
 		local propName = key:sub(4)
-		assert(self._metaReadable[propName] ~= nil or self._metaVirtualReadable[propName] ~= nil, `{propName} is not a valid member of {getName(self)}`)
-
 		if self._metaReadable[propName] then
 			return function(self)
 				return self._instance[propName]
