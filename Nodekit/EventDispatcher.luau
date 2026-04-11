@@ -73,9 +73,9 @@ local function canCullByParentBounds(node)
 	return inst and inst:IsA("GuiObject") and inst.ClipsDescendants == true
 end
 
-local function getRunningScene(self)
+local function getRootNode(self)
 	local d = self._director
-	return d and d.getRunningScene and d:getRunningScene()
+	return d and d.froot
 end
 
 local function handleNode(self, node, event)
@@ -157,13 +157,13 @@ local function makePayload(input, processed, pos, wasButtonPressed, pointerId)
 end
 
 local function updateHover(self, pointerId, pos)
-	local scene = getRunningScene(self)
-	if not scene then
+	local root = getRootNode(self)
+	if not root then
 		return false
 	end
 
 	local dispatched = false
-	local hit = findTopmostAt(scene, pos)
+	local hit = findTopmostAt(root, pos)
 	local prev = self._hoverNodes[pointerId]
 
 	if hit == prev then
@@ -219,12 +219,12 @@ local function updateHover(self, pointerId, pos)
 end
 
 local function dispatchWheel(self, pos, delta)
-	local scene = getRunningScene(self)
-	if not scene then
+	local root = getRootNode(self)
+	if not root then
 		return false
 	end
 
-	local hit = findTopmostAt(scene, pos)
+	local hit = findTopmostAt(root, pos)
 	if hit then
 		dispatchDirect(
 			self,
@@ -240,28 +240,30 @@ local function dispatchWheel(self, pos, delta)
 	return false
 end
 
-local function dispatchDownTree(self, root, event)
+local function dispatchUpTree(self, root, event, ignoreRoot)
 	if not root or not event then
 		return event
 	end
 
 	local function walk(node)
-		handleNode(self, node, event)
-
-		if typeof(event.isConsumed) == "function" and event:isConsumed() then
-			return true
-		end
-
-		if isBlockingLayer(node) then
-			return true
-		end
-
-		local children = node._children
-		if children then
-			for _, childNode in children do
+		local renderList = node:getRenderList()
+		if renderList then
+			for _, childNode in renderList do
 				if walk(childNode) then
 					return true
 				end
+			end
+		end
+
+		if not ignoreRoot or node ~= root then
+			handleNode(self, node, event)
+
+			if typeof(event.isConsumed) == "function" and event:isConsumed() then
+				return true
+			end
+
+			if isBlockingLayer(node) then
+				return true
 			end
 		end
 
@@ -283,9 +285,9 @@ function EventDispatcher:create(director)
 	return inst
 end
 
-function EventDispatcher:dispatch(event, root)
-	local r = root or getRunningScene(self)
-	return dispatchDownTree(self, r, event)
+function EventDispatcher:dispatch(event, root, ignoreRoot)
+	local r = root or getRootNode(self)
+	return dispatchUpTree(self, r, event, ignoreRoot or root == nil)
 end
 
 function EventDispatcher:bindUserInput()
@@ -305,8 +307,8 @@ function EventDispatcher:bindUserInput()
 			end
 		end
 
-		local scene = getRunningScene(self)
-		local hit = scene and findTopmostAt(scene, pos)
+		local root = getRootNode(self)
+		local hit = root and findTopmostAt(root, pos)
 
 		if isPressInput(input) then
 			self._pressNodes[pointerId] = hit
@@ -320,7 +322,7 @@ function EventDispatcher:bindUserInput()
 			end
 		end
 
-		dispatchDownTree(self, scene, Event:create("InputBegan", makePayload(input, gp, pos, pointerSent, pointerId)))
+		dispatchUpTree(self, root, Event:create("InputBegan", makePayload(input, gp, pos, pointerSent, pointerId)), true)
 	end)
 
 	self._conns[#self._conns + 1] = UserInputService.InputChanged:Connect(function(input, gp)
@@ -347,8 +349,8 @@ function EventDispatcher:bindUserInput()
 			end
 		end
 
-		local scene = getRunningScene(self)
-		local hit = scene and findTopmostAt(scene, pos)
+		local root = getRootNode(self)
+		local hit = root and findTopmostAt(root, pos)
 		if hit then
 			dispatchDirect(
 				self,
@@ -358,7 +360,7 @@ function EventDispatcher:bindUserInput()
 			pointerSent = true
 		end
 
-		dispatchDownTree(self, scene, Event:create("InputChanged", makePayload(input, gp, pos, pointerSent, pointerId)))
+		dispatchUpTree(self, root, Event:create("InputChanged", makePayload(input, gp, pos, pointerSent, pointerId)), true)
 	end)
 
 	self._conns[#self._conns + 1] = UserInputService.InputEnded:Connect(function(input, gp)
@@ -367,7 +369,7 @@ function EventDispatcher:bindUserInput()
 		end
 
 		local pointerId = getPointerId(input)
-		local scene = getRunningScene(self)
+		local root = getRootNode(self)
 		local pos = resolveInputPosition(self, input)
 
 		local pointerSent = false
@@ -379,7 +381,7 @@ function EventDispatcher:bindUserInput()
 		end
 
 		if isPressInput(input) then
-			local hit = scene and findTopmostAt(scene, pos)
+			local hit = root and findTopmostAt(root, pos)
 			local pressed = self._pressNodes[pointerId]
 
 			if hit then
@@ -404,7 +406,7 @@ function EventDispatcher:bindUserInput()
 			self._hoverNodes[pointerId] = nil
 		end
 
-		dispatchDownTree(self, scene, Event:create("InputEnded", makePayload(input, gp, pos, pointerSent, pointerId)))
+		dispatchUpTree(self, root, Event:create("InputEnded", makePayload(input, gp, pos, pointerSent, pointerId)), true)
 	end)
 
 	return self

@@ -537,10 +537,12 @@ end
 
 function Node:pauseTween(tween)
 	safeCall(tween, "pause")
+	return self
 end
 
 function Node:resumeTween(tween)
 	safeCall(tween, "resume")
+	return self
 end
 
 function Node:stopTween(tween)
@@ -549,6 +551,7 @@ function Node:stopTween(tween)
 		self:_untrackTween(tween)
 		self._tweens[tween] = nil
 	end
+	return self
 end
 
 function Node:stopAllTweens()
@@ -560,6 +563,7 @@ function Node:stopAllTweens()
 	end
 	table.clear(self._tweens)
 	self._activeTweens = nil
+	return self
 end
 
 function Node:stopAllActions()
@@ -572,6 +576,7 @@ function Node:stopAllActions()
 		end
 	end
 	self._actions = {}
+	return self
 end
 
 function Node:isRunning()
