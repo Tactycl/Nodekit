@@ -298,17 +298,13 @@ function EventDispatcher:bindUserInput()
 
 		local pointerId = getPointerId(input)
 		local pos = resolveInputPosition(self, input)
-
-		local pointerSent = false
-
 		if input.UserInputType ~= Enum.UserInputType.Touch then
-			if updateHover(self, pointerId, pos) then
-				pointerSent = true
-			end
+			updateHover(self, pointerId, pos)
 		end
 
 		local root = getRootNode(self)
 		local hit = root and findTopmostAt(root, pos)
+		local wasButtonPressed = false
 
 		if isPressInput(input) then
 			self._pressNodes[pointerId] = hit
@@ -318,11 +314,11 @@ function EventDispatcher:bindUserInput()
 					hit,
 					Event:create("PointerBegan", makePayload(input, gp, pos, false, pointerId))
 				)
-				pointerSent = true
+				wasButtonPressed = true
 			end
 		end
 
-		dispatchUpTree(self, root, Event:create("InputBegan", makePayload(input, gp, pos, pointerSent, pointerId)), true)
+		dispatchUpTree(self, root, Event:create("InputBegan", makePayload(input, gp, pos, wasButtonPressed, pointerId)), true)
 	end)
 
 	self._conns[#self._conns + 1] = UserInputService.InputChanged:Connect(function(input, gp)
@@ -371,15 +367,11 @@ function EventDispatcher:bindUserInput()
 		local pointerId = getPointerId(input)
 		local root = getRootNode(self)
 		local pos = resolveInputPosition(self, input)
-
-		local pointerSent = false
-
 		if input.UserInputType ~= Enum.UserInputType.Touch then
-			if updateHover(self, pointerId, pos) then
-				pointerSent = true
-			end
+			updateHover(self, pointerId, pos)
 		end
 
+		local wasButtonPRessed = false
 		if isPressInput(input) then
 			local hit = root and findTopmostAt(root, pos)
 			local pressed = self._pressNodes[pointerId]
@@ -390,7 +382,7 @@ function EventDispatcher:bindUserInput()
 					hit,
 					Event:create("PointerEnded", makePayload(input, gp, pos, false, pointerId))
 				)
-				pointerSent = true
+				wasButtonPRessed = true
 			end
 
 			if hit and pressed and hit == pressed then
@@ -399,14 +391,14 @@ function EventDispatcher:bindUserInput()
 					hit,
 					Event:create("PointerClick", makePayload(input, gp, pos, false, pointerId))
 				)
-				pointerSent = true
+				wasButtonPRessed = true
 			end
 
 			self._pressNodes[pointerId] = nil
 			self._hoverNodes[pointerId] = nil
 		end
 
-		dispatchUpTree(self, root, Event:create("InputEnded", makePayload(input, gp, pos, pointerSent, pointerId)), true)
+		dispatchUpTree(self, root, Event:create("InputEnded", makePayload(input, gp, pos, wasButtonPRessed, pointerId)), true)
 	end)
 
 	return self
