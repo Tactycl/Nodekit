@@ -656,6 +656,7 @@ NodeTypes:init(function(className)
 	NodeRegistry.register(self)
 	updateInstanceName(self)
 
+	safeCall(self, "init")
 	return self
 end)
 
