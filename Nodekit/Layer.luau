@@ -415,11 +415,3 @@ function Layer:destroy()
 end
 
 return Layer
-
-
-function Layer:destroy()
-	self:_detachUpdate()
-	return Node.destroy(self)
-end
-
-return Layer
