@@ -68,23 +68,12 @@ function Director:init()
 		:setType("Container")
 	inst.root:addChild(inst.froot)
 
-	inst.froot.onChildAdded = function(_, childNode: any)
-		if childNode._BASE_TYPE ~= "Scene" then
-			enterSubtree(childNode)
-			activateSubtree(childNode)
-		end
-	end
-
-	inst.froot.onChildRemoved = function(_, childNode: any)
-		if childNode._BASE_TYPE ~= "Scene" then
-			exitSubtree(childNode)
-		end
-	end
-
 	_instance = inst
 
 	updateScale()
 	inst.root.onAbsoluteSizeChanged = updateScale
+
+	enterSubtree(inst.root)
 
 	return inst
 end

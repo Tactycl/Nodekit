@@ -148,17 +148,16 @@ function Layer:_setRunning(running: boolean)
 	if running and not self._isRunning then
 		self._isRunning = true
 		self._isPaused = false
-		self:onEnter()
 
 		if self._isUpdateEnabled then
 			self:_attachUpdate()
 		end
+
 	elseif not running and self._isRunning then
 		self._isRunning = false
 		self._isPaused = false
 		self._isTransitioning = false
 		self:_detachUpdate()
-		self:onExit()
 	end
 end
 
