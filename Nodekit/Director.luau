@@ -8,7 +8,6 @@ local Scene = require("./Scene")
 
 local activateSubtree = require("./util/activateSubtree")
 local enterSubtree = require("./util/enterSubtree")
-local exitSubtree = require("./util/exitSubtree")
 local enterTransitionDidFinishSubtree = require("./util/enterTransitionDidFinishSubtree")
 local exitTransitionDidStartSubtree = require("./util/exitTransitionDidStartSubtree")
 
@@ -131,7 +130,6 @@ function Director:runWithScene(scene)
 	self.nextScene = nil
 	self.froot:addChild(scene)
 
-	enterSubtree(scene)
 	activateSubtree(scene)
 
 	return scene
@@ -142,7 +140,6 @@ function Director:replaceScene(scene)
 	self.nextScene = scene
 
 	if outgoing then
-		exitSubtree(outgoing)
 		outgoing:removeFromParent()
 	end
 
@@ -150,7 +147,6 @@ function Director:replaceScene(scene)
 	self.runningScene = scene
 	self.froot:addChild(scene)
 
-	enterSubtree(scene)
 	activateSubtree(scene)
 
 	self.nextScene = nil
@@ -162,7 +158,6 @@ function Director:pushScene(scene)
 	self.nextScene = scene
 
 	if outgoing then
-		exitSubtree(outgoing)
 		outgoing:removeFromParent()
 	end
 
@@ -170,7 +165,6 @@ function Director:pushScene(scene)
 	self.runningScene = scene
 	self.froot:addChild(scene)
 
-	enterSubtree(scene)
 	activateSubtree(scene)
 
 	self.nextScene = nil
@@ -187,7 +181,6 @@ function Director:popScene()
 	self.nextScene = incoming
 
 	if outgoing then
-		exitSubtree(outgoing)
 		outgoing:removeFromParent()
 	end
 
@@ -195,7 +188,6 @@ function Director:popScene()
 
 	if incoming then
 		self.froot:addChild(incoming)
-		enterSubtree(incoming)
 		incoming:setVisible(true)
 	end
 
@@ -216,7 +208,7 @@ function Director:replaceSceneWithTransition(t, transitionScene, incoming)
 		table.insert(self.sceneStack, incoming)
 		self.runningScene = incoming
 		self.froot:addChild(incoming)
-		enterSubtree(incoming)
+
 		activateSubtree(incoming)
 
 		self.nextScene = nil
@@ -234,7 +226,6 @@ function Director:replaceSceneWithTransition(t, transitionScene, incoming)
 	self.froot:addChild(outgoing)
 
 	incoming:setSceneType(Scene.Type.TRANSITION)
-	enterSubtree(incoming)
 
 	local finished = false
 	local function finish()
@@ -244,7 +235,6 @@ function Director:replaceSceneWithTransition(t, transitionScene, incoming)
 		finished = true
 
 		outgoing:setSceneType(Scene.Type.DEFAULT)
-		exitSubtree(outgoing)
 		outgoing:removeFromParent()
 
 		finalizeTransition(self, incoming)
@@ -282,7 +272,6 @@ function Director:pushSceneWithTransition(t, transitionScene, incoming)
 	self.froot:addChild(incoming)
 
 	incoming:setSceneType(Scene.Type.TRANSITION)
-	enterSubtree(incoming)
 
 	local finished = false
 	local function finish()
@@ -293,7 +282,6 @@ function Director:pushSceneWithTransition(t, transitionScene, incoming)
 
 		if outgoing then
 			outgoing:setSceneType(Scene.Type.DEFAULT)
-			exitSubtree(outgoing)
 			outgoing:removeFromParent()
 		end
 
@@ -331,7 +319,6 @@ function Director:popSceneWithTransition(t, transitionScene)
 	self.froot:addChild(outgoing)
 
 	incoming:setSceneType(Scene.Type.TRANSITION)
-	enterSubtree(incoming)
 
 	local finished = false
 	local function finish()
@@ -344,7 +331,6 @@ function Director:popSceneWithTransition(t, transitionScene)
 		self.runningScene = incoming
 
 		outgoing:setSceneType(Scene.Type.DEFAULT)
-		exitSubtree(outgoing)
 		outgoing:removeFromParent()
 
 		finalizeTransition(self, incoming)
