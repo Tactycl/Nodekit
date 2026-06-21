@@ -1,6 +1,11 @@
 --!strict
 
-export type EventType = string
+type DefaultEventTypes = 
+	"PointerMoved" | "PointerLeave" | "PointerEnter" | "PointerMoved" | "PointerWheel" |
+	"PointerBegan" | "PointerChanged" | "PointerEnded" | "PointerClick" |
+	"InputBegan" | "InputChanged" | "InputEnded"
+
+export type EventType = DefaultEventTypes | string
 export type EventPayload = {[any]: any}
 
 export type Event = {
