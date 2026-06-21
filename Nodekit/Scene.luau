@@ -1,4 +1,4 @@
-local Node = require("./Node")
+const Node = require("./Node")
 
 local Scene = Node:inherit()
 Scene._BASE_TYPE = "Scene"

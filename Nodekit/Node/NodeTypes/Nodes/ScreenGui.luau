@@ -1,5 +1,5 @@
-local VirtualScale = require("../Virtuals/Scale")
-local VirtualPadding = require("../Virtuals/Padding")
+const VirtualScale = require("../Virtuals/Scale")
+const VirtualPadding = require("../Virtuals/Padding")
 
 local ScreenGui = {}
 

@@ -1,4 +1,4 @@
-local safeCall = require("../../../util/safeCall")
+const safeCall = require("../../../util/safeCall")
 
 return function(self, event)
 	local t = event.type

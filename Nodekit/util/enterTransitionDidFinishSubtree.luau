@@ -1,4 +1,4 @@
-local callFnThroughTreeAndSelf = require("./callFnThroughTreeAndSelf")
+const callFnThroughTreeAndSelf = require("./callFnThroughTreeAndSelf")
 
 return function(self)
 	callFnThroughTreeAndSelf(self, "onEnterTransitionDidFinish", function(n)

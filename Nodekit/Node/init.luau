@@ -1,20 +1,23 @@
-local CollectionService = game:GetService("CollectionService")
-local UserInputService = game:GetService("UserInputService")
+const CollectionService = game:GetService("CollectionService")
+const UserInputService = game:GetService("UserInputService")
 
-local enterSubtree = require("./util/enterSubtree")
-local exitSubtree = require("./util/exitSubtree")
-local safeCall = require("./util/safeCall")
+const enterSubtree = require("./util/enterSubtree")
+const exitSubtree = require("./util/exitSubtree")
+const safeCall = require("./util/safeCall")
 
-local NodeTypes = require("@self/NodeTypes")
-local NodeRegistry = require("@self/NodeRegistry")
-local Tween = require("@self/Tween")
-local Action = require("@self/Action")
+const NodeTypes = require("@self/NodeTypes")
+const NodeRegistry = require("@self/NodeRegistry")
+const Tween = require("@self/Tween")
+const Action = require("@self/Action")
 
-local ZINDEX_ORDERING_PRIORITY = {
+const ZINDEX_ORDERING_PRIORITY = {
 	"Node",
 	"Layer",
 	"Scene",
 }
+
+-- Forward types
+export type TweenEasingStyle = Tween.EasingStyle
 
 local function getName(self)
 	local rblxInstance = self._instance
@@ -252,6 +255,11 @@ function Node:getCursorPositionScaled()
 	return self:getCursorPosition() / self:getAbsoluteSize()
 end
 
+function Node:getOrder()
+	local rblxInstance = self._instance
+	return rblxInstance:IsA("GuiObject") and rblxInstance.LayoutOrder or 0
+end
+
 function Node:addTag(tag: string)
 	if not self._tags[tag] then
 		self._tags[tag] = true
@@ -341,14 +349,12 @@ function Node:addChild(childNode, zIndex: number?)
 	assert(typeof(childNode) == "table" and childNode._instance, "addChild expects a Node")
 	assert(childNode ~= self, "Cannot parent node to itself")
 
-	if childNode._parent == self and zIndex == nil then
-		return self
-	end
+	local wasRunning = childNode._isRunning
 
 	detachFromOldParent(childNode)
 	attachToParent(childNode, self, zIndex)
 
-	if self._isRunning == true then
+	if self._isRunning == true and not wasRunning then
 		enterSubtree(childNode)
 	end
 

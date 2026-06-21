@@ -1,4 +1,4 @@
-local Director = require("../../../Director")
+const Director = require("../../../Director")
 
 local TextSize = {}
 
@@ -107,7 +107,7 @@ TextSize.setVirtualMin = function(self, v)
 		destroyConstraint(self)
 
 	else
-		self._minTextSize =  v
+		self._minTextSize =	v
 	end
 end
 

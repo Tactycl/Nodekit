@@ -1,14 +1,14 @@
-local VirtualCorners = require("../Virtuals/Corners")
-local VirtualScale = require("../Virtuals/Scale")
-local VirtualPadding = require("../Virtuals/Padding")
-local VirtualAspectRatio = require("../Virtuals/AspectRatio")
-local VirtualFlexItem = require("../Virtuals/FlexItem")
-local VirtualGradient = require("../Virtuals/Gradient")
-local VirtualSizeConstraint = require("../Virtuals/SizeConstraint")
-local VirtualListLayout = require("../Virtuals/ListLayout")
-local VirtualGridLayout = require("../Virtuals/GridLayout")
+const VirtualCorners = require("../Virtuals/Corners")
+const VirtualScale = require("../Virtuals/Scale")
+const VirtualPadding = require("../Virtuals/Padding")
+const VirtualAspectRatio = require("../Virtuals/AspectRatio")
+const VirtualFlexItem = require("../Virtuals/FlexItem")
+const VirtualGradient = require("../Virtuals/Gradient")
+const VirtualSizeConstraint = require("../Virtuals/SizeConstraint")
+const VirtualListLayout = require("../Virtuals/ListLayout")
+const VirtualGridLayout = require("../Virtuals/GridLayout")
 
-local onPointerEvent = require("../Funcs/onPointerEvent")
+const onPointerEvent = require("../Funcs/onPointerEvent")
 
 local Frame = {}
 

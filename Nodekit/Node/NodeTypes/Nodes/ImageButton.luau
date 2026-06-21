@@ -1,14 +1,14 @@
-local safeCall = require("../../../util/safeCall")
+const safeCall = require("../../../util/safeCall")
 
-local VirtualCorners = require("../Virtuals/Corners")
-local VirtualScale = require("../Virtuals/Scale")
-local VirtualPadding = require("../Virtuals/Padding")
-local VirtualAspectRatio = require("../Virtuals/AspectRatio")
-local VirtualFlexItem = require("../Virtuals/FlexItem")
-local VirtualGradient = require("../Virtuals/Gradient")
-local VirtualSizeConstraint = require("../Virtuals/SizeConstraint")
+const VirtualCorners = require("../Virtuals/Corners")
+const VirtualScale = require("../Virtuals/Scale")
+const VirtualPadding = require("../Virtuals/Padding")
+const VirtualAspectRatio = require("../Virtuals/AspectRatio")
+const VirtualFlexItem = require("../Virtuals/FlexItem")
+const VirtualGradient = require("../Virtuals/Gradient")
+const VirtualSizeConstraint = require("../Virtuals/SizeConstraint")
 
-local onPointerEvent = require("../Funcs/onPointerEvent")
+const onPointerEvent = require("../Funcs/onPointerEvent")
 
 local ImageButton = {}
 

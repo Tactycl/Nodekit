@@ -1,6 +1,6 @@
-local UserInputService = game:GetService("UserInputService")
+const UserInputService = game:GetService("UserInputService")
 
-local Event = require("./Event")
+const Event = require("./Event")
 
 local EventDispatcher = {}
 EventDispatcher.__index = EventDispatcher

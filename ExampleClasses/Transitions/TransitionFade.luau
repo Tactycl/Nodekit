@@ -1,17 +1,17 @@
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
+const ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local Nodekit = require(ReplicatedStorage.Packages.Nodekit)
+const Nodekit = require(ReplicatedStorage.Packages.Nodekit)
 
-local Node = Nodekit.Node
-local Transition = Nodekit.Transition
+const Node = Nodekit.Node
+const Transition = Nodekit.Transition
 
 local TransitionFade = Transition:inherit()
 
-type FadeOptions = {
+export type TransitionFadeOptions = {
 	color: Color3?,
 }
 
-function TransitionFade:create(opts: FadeOptions?)
+function TransitionFade:create(opts: TransitionFadeOptions?)
 	local inst = setmetatable(Transition:create(), TransitionFade)
 	inst._color = (opts and opts.color) or Color3.new(0, 0, 0)
 	return inst
@@ -32,7 +32,7 @@ function TransitionFade:run(duration: number, incoming: any, outgoing: any, fini
 		return
 	end
 
-	local parent = self._getRootGuiParent(incoming, outgoing)
+	local parent = incoming:getParent() or outgoing:getParent()
 	if not parent then
 		finalize()
 		return
@@ -58,17 +58,13 @@ function TransitionFade:run(duration: number, incoming: any, outgoing: any, fini
 		if outgoing then
 			outgoing:setVisible(false)
 		end
+		incoming:setVisible(true)
 
 		tweenOut:onComplete(function()
 			overlay:destroy()
 			finalize()
-		end)
-
-		incoming:setVisible(true)
-		tweenOut:play()
-	end)
-
-	tweenIn:play()
+		end):play()
+	end):play()
 end
 
 return TransitionFade

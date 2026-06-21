@@ -1,8 +1,8 @@
-local RunService = game:GetService("RunService")
+const RunService = game:GetService("RunService")
 
-local safeCall = require("./util/safeCall")
+const safeCall = require("./util/safeCall")
 
-local Node = require("./Node")
+const Node = require("./Node")
 
 local Layer = Node:inherit()
 Layer._BASE_TYPE = "Layer"

@@ -1,7 +1,9 @@
-local TweenService = game:GetService("TweenService")
-local RunService = game:GetService("RunService")
+const TweenService = game:GetService("TweenService")
+const RunService = game:GetService("RunService")
 
 local Tween = {}
+
+export type EasingStyle = Enum.EasingStyle | (alpha: number, easingDirection: Enum.EasingDirection) -> (number)
 
 Tween.__index = function(self, key)
 	local method = rawget(Tween, key)
@@ -107,7 +109,7 @@ local function fireCompleted(self)
 	end
 end
 
-function Tween:create(node: any, time: number, easingStyleOrFunc: Enum.EasingStyle?|(v: number) -> (number)?, easingDirection: Enum.EasingDirection?)
+function Tween:create(node: any, time: number, easingStyleOrFunc: EasingStyle?, easingDirection: Enum.EasingDirection?)
 	local inst = setmetatable({}, Tween)
 
 	inst._node = node
@@ -118,8 +120,8 @@ function Tween:create(node: any, time: number, easingStyleOrFunc: Enum.EasingSty
 		
 	else
 		inst._style = easingStyleOrFunc or Enum.EasingStyle.Linear
-		inst._dir = easingDirection or Enum.EasingDirection.In
 	end
+	inst._dir = easingDirection or Enum.EasingDirection.In
 
 	inst._goals = {}
 
@@ -282,7 +284,7 @@ function Tween:play()
 
 		local eased
 		if typeof(self._interpolateFunc) == "function" then
-			eased = self._interpolateFunc(alpha)
+			eased = self._interpolateFunc(alpha, self._dir)
 			
 		else
 			eased = TweenService:GetValue(alpha, self._style, self._dir)

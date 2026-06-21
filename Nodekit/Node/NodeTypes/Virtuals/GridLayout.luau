@@ -1,4 +1,4 @@
-local Director = require("../../../Director")
+const Director = require("../../../Director")
 
 local GridLayout = {}
 

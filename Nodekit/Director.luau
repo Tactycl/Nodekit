@@ -1,20 +1,21 @@
-local GuiService = game:GetService("GuiService")
-local Players = game:GetService("Players")
+const GuiService = game:GetService("GuiService")
+const Players = game:GetService("Players")
 
-local LocalPlayer = Players.LocalPlayer
+const LocalPlayer = Players.LocalPlayer
 
-local Node = require("./Node")
-local Scene = require("./Scene")
+const Node = require("./Node")
+const Scene = require("./Scene")
 
-local activateSubtree = require("./util/activateSubtree")
-local enterSubtree = require("./util/enterSubtree")
-local enterTransitionDidFinishSubtree = require("./util/enterTransitionDidFinishSubtree")
-local exitTransitionDidStartSubtree = require("./util/exitTransitionDidStartSubtree")
+const activateSubtree = require("./util/activateSubtree")
+const enterSubtree = require("./util/enterSubtree")
+const enterTransitionDidFinishSubtree = require("./util/enterTransitionDidFinishSubtree")
+const exitTransitionDidStartSubtree = require("./util/exitTransitionDidStartSubtree")
+
+const REFERENCE_SIZE_PIXELS = 1080
 
 local Director = {}
 Director.__index = Director
 
-local REFERENCE_SIZE_PIXELS = 1080
 local _instance
 
 local function finalizeTransition(self, incoming)
@@ -222,8 +223,7 @@ function Director:replaceSceneWithTransition(t, transitionScene, incoming)
 	self.sceneStack[#self.sceneStack] = incoming
 	self.runningScene = incoming
 
-	self.froot:addChild(incoming)
-	self.froot:addChild(outgoing)
+	self.froot:add(incoming, outgoing)
 
 	incoming:setSceneType(Scene.Type.TRANSITION)
 
@@ -315,8 +315,7 @@ function Director:popSceneWithTransition(t, transitionScene)
 	outgoing:setSceneType(Scene.Type.TRANSITION)
 	exitTransitionDidStartSubtree(outgoing)
 
-	self.froot:addChild(incoming)
-	self.froot:addChild(outgoing)
+	self.froot:add(incoming, outgoing)
 
 	incoming:setSceneType(Scene.Type.TRANSITION)
 
