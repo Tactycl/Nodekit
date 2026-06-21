@@ -9,6 +9,7 @@ const NodeTypes = require("@self/NodeTypes")
 const NodeRegistry = require("@self/NodeRegistry")
 const Tween = require("@self/Tween")
 const Action = require("@self/Action")
+const Event = require("./Event")
 
 const ZINDEX_ORDERING_PRIORITY = {
 	"Node",
@@ -622,7 +623,7 @@ function Node:onEnter() end
 function Node:onExit() end
 function Node:onEnterTransitionDidFinish() end
 function Node:onExitTransitionDidStart() end
-function Node:onEvent(event: any) end
+function Node:onEvent(event: Event.Event) end
 
 function Node:destroy()
 	safeCall(self, "onDestroyed")
