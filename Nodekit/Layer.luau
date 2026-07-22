@@ -5,7 +5,6 @@ const safeCall = require("./util/safeCall")
 const Node = require("./Node")
 
 local Layer = Node:inherit()
-Layer._BASE_TYPE = "Layer"
 
 function Layer:inherit()
 	local newClass = {}
@@ -31,7 +30,11 @@ function Layer:create(t: string?)
 		:setAnchorPoint(Vector2.new(0.5, 0.5))
 		:setBackgroundTransparency(1)
 		:setActive(false)
-		:setType(t or "Layer")
+		:addType("Layer")
+
+	if type(t) == "string" then
+		node:addType(t)
+	end
 
 	local inst: any = setmetatable(node, Layer)
 

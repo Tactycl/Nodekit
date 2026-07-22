@@ -7,6 +7,7 @@ const VirtualGradient = require("../Virtuals/Gradient")
 const VirtualSizeConstraint = require("../Virtuals/SizeConstraint")
 const VirtualListLayout = require("../Virtuals/ListLayout")
 const VirtualGridLayout = require("../Virtuals/GridLayout")
+const VirtualStroke = require("../Virtuals/Stroke")
 
 const onPointerEvent = require("../Funcs/onPointerEvent")
 
@@ -183,6 +184,16 @@ ScrollingFrame.properties = {
 		{ name = "GridAbsoluteCellCount", fn = VirtualGridLayout.getVirtualAbsoluteCellCount },
 		{ name = "GridAbsoluteCellSize", fn = VirtualGridLayout.getVirtualAbsoluteCellSize },
 		{ name = "GridAbsoluteContentSize", fn = VirtualGridLayout.getVirtualAbsoluteContentSize },
+
+		{ name = "StrokeEnabled", fn = VirtualStroke.setVirtualEnabled },
+		{ name = "StrokeApplyMode", fn = VirtualStroke.setVirtualApplyMode },
+		{ name = "StrokeBorderOffset", fn = VirtualStroke.setVirtualBorderOffset },
+		{ name = "StrokeBorderPosition", fn = VirtualStroke.setVirtualBorderPosition },
+		{ name = "StrokeColor", fn = VirtualStroke.setVirtualColor },
+		{ name = "StrokeLineJoinMode", fn = VirtualStroke.setVirtualLineJoinMode },
+		{ name = "StrokeSizingMode", fn = VirtualStroke.setVirtualSizingMode },
+		{ name = "StrokeThickness", fn = VirtualStroke.setVirtualThickness },
+		{ name = "StrokeTransparency", fn = VirtualStroke.setVirtualTransparency },
 	},
 	virtualWriteable = {
 		{ name = "CornerRadius", fn = VirtualCorners.setVirtual },
@@ -233,6 +244,16 @@ ScrollingFrame.properties = {
 		{ name = "GridHorizontalAlignment", fn = VirtualGridLayout.setVirtualHorizontalAlignment },
 		{ name = "GridStartCorner", fn = VirtualGridLayout.setVirtualStartCorner },
 		{ name = "GridVerticalAlignment", fn = VirtualGridLayout.setVirtualVerticalAlignment },
+
+		{ name = "StrokeEnabled", fn = VirtualStroke.getVirtualEnabled },
+		{ name = "StrokeApplyMode", fn = VirtualStroke.getVirtualApplyMode },
+		{ name = "StrokeBorderOffset", fn = VirtualStroke.getVirtualBorderOffset },
+		{ name = "StrokeBorderPosition", fn = VirtualStroke.getVirtualBorderPosition },
+		{ name = "StrokeColor", fn = VirtualStroke.getVirtualColor },
+		{ name = "StrokeLineJoinMode", fn = VirtualStroke.getVirtualLineJoinMode },
+		{ name = "StrokeSizingMode", fn = VirtualStroke.getVirtualSizingMode },
+		{ name = "StrokeThickness", fn = VirtualStroke.getVirtualThickness },
+		{ name = "StrokeTransparency", fn = VirtualStroke.getVirtualTransparency },
 	},
 }
 

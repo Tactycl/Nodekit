@@ -1,7 +1,6 @@
 const Node = require("./Node")
 
 local Scene = Node:inherit()
-Scene._BASE_TYPE = "Scene"
 Scene.Type = table.freeze({
 	DEFAULT = "DEFAULT",
 	TRANSITION = "TRANSITION",
@@ -30,7 +29,11 @@ function Scene:create(t: string?)
 		:setAnchorPoint(Vector2.new(0.5, 0.5))
 		:setSize(UDim2.fromScale(1, 1))
 		:setBackgroundTransparency(1)
-		:setType(t or "Scene")
+		:addType("Scene")
+
+	if type(t) == "string" then
+		node:addType(t)
+	end
 
 	local inst = setmetatable(node, Scene)
 	inst._sceneType = Scene.Type.DEFAULT

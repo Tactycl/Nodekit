@@ -57,7 +57,7 @@ function Director:init()
 		:setIgnoreGuiInset(true)
 		:setZIndexBehavior(Enum.ZIndexBehavior.Sibling)
 		:setId("root")
-		:setType("Director")
+		:addType("Director")
 	inst.root._instance.Parent = inst.playerGui
 
 	inst.froot = Node.Frame:create()
@@ -65,7 +65,7 @@ function Director:init()
 		:setAnchorPoint(Vector2.new(0.5, 0.5))
 		:setBackgroundTransparency(1)
 		:setId("froot")
-		:setType("Container")
+		:addType("Container")
 	inst.root:addChild(inst.froot)
 
 	_instance = inst

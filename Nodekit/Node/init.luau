@@ -22,12 +22,12 @@ export type TweenEasingStyle = Tween.EasingStyle
 
 local function getName(self)
 	local rblxInstance = self._instance
-	local typeName = (self._type ~= nil and self._type ~= self._BASE_TYPE) and `{self._BASE_TYPE}::{self._type}` or self._BASE_TYPE
+	local types = table.concat(self._types, "::")
 	local id = self._id
 	local order = rblxInstance:IsA("GuiObject") and rblxInstance.LayoutOrder or "0"
 	local childrenCount = #self._children
 
-	local name = id ~= nil and `{typeName} "{id}"` or typeName
+	local name = id ~= nil and `{types} "{id}"` or types
 	if childrenCount > 0 then
 		name ..= ` <{childrenCount}>`
 	end
@@ -322,18 +322,25 @@ function Node:getName()
 	return getName(self)
 end
 
+-- Compatibility
 function Node:setType(t: string)
-	self._type = t
+	self._types[2] = t
+	updateInstanceName(self)
+	return self
+end
+
+function Node:addType(t: string)
+	table.insert(self._types, t)
 	updateInstanceName(self)
 	return self
 end
 
 function Node:getType()
-	return self._type
+	return self._types[#self._types]
 end
 
 function Node:isA(n: string)
-	if self._type == n or self._BASE_TYPE == n then
+	if table.find(self._types, n) then
 		return true
 	end
 	return self._instance:IsA(n)
@@ -405,7 +412,7 @@ function Node:getDescendantsByType(type: string, ignoresNodeDescendantsWhenNodeN
 	local descendants = {}
 	local function walk(node)
 		for _, childNode in node._children do
-			if childNode._type == type or childNode._BASE_TYPE == type then
+			if table.find(childNode._types, type) then
 				table.insert(descendants, childNode)
 				walk(childNode)
 
@@ -425,7 +432,7 @@ end
 function Node:getChildrenByType(type: string)
 	local children = {}
 	for _, childNode in self._children do
-		if childNode._type == type or childNode._BASE_TYPE == type then
+		if table.find(childNode._types, type) then
 			table.insert(children, childNode)
 		end
 	end
@@ -452,7 +459,7 @@ end
 function Node:getChildByType(type: string, i: number?)
 	local currentPointerIndex = 0
 	for _, childNode in self._children do
-		if childNode._type == type or childNode._BASE_TYPE == type then
+		if table.find(childNode._types, type) then
 			if currentPointerIndex == (i or 0) then
 				return childNode
 			end
@@ -647,7 +654,7 @@ NodeTypes:init(function(className)
 	self._instance = instance
 	self._parent = nil
 	self._id = nil
-	self._type = "Node"
+	self._types = { "Node" }
 
 	self._isRunning = false
 	self._isTransitioning = false
