@@ -147,11 +147,15 @@ local function resolveInputPosition(self, input)
 end
 
 local function makePayload(input, processed, pos, wasButtonPressed, pointerId)
+	local wasTyping = UserInputService:GetFocusedTextBox() ~= nil
+	local wasProcessed = wasButtonPressed == true or wasTyping
 	return {
 		input = input,
 		gameProcessed = processed,
 		position = pos,
 		wasButtonPressed = wasButtonPressed == true,
+		wasTyping = wasTyping,
+		wasProcessed = wasProcessed,
 		pointerId = pointerId,
 	}
 end
