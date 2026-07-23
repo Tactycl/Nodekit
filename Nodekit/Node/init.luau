@@ -356,9 +356,12 @@ end
 function Node:addChild(childNode, zIndex: number?)
 	assert(typeof(childNode) == "table" and childNode._instance, "addChild expects a Node")
 	assert(childNode ~= self, "Cannot parent node to itself")
+	
+	if childNode:isDestroyed() or self:isDestroyed() then
+		return
+	end
 
 	local wasRunning = childNode._isRunning
-
 	detachFromOldParent(childNode)
 	attachToParent(childNode, self, zIndex)
 
@@ -386,7 +389,6 @@ function Node:removeFromParent()
 	end
 
 	local wasRunning = (self._isRunning == true)
-
 	detachFromOldParent(self)
 
 	if wasRunning then
@@ -632,6 +634,10 @@ function Node:onEnterTransitionDidFinish() end
 function Node:onExitTransitionDidStart() end
 function Node:onEvent(event: Event.Event) end
 
+function Node:isDestroyed()
+	return self._isDestroyed or false
+end
+
 function Node:destroy()
 	safeCall(self, "onDestroyed")
 
@@ -645,6 +651,7 @@ function Node:destroy()
 	table.clear(self._attributes)
 
 	self._instance:Destroy()
+	self._isDestroyed = true
 end
 
 NodeTypes:init(function(className)
