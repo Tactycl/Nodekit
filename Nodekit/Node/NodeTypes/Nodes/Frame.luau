@@ -20,6 +20,7 @@ Frame.create = function(self)
 	self._instance.BackgroundColor3 = Color3.new(1, 1, 1)
 	self._instance.BorderSizePixel = 0
 	self._instance.BorderColor3 = Color3.new(0, 0, 0)
+	self:addType("Frame")
 end
 
 Frame.properties = {
@@ -149,15 +150,15 @@ Frame.properties = {
 		{ name = "GridAbsoluteCellSize", fn = VirtualGridLayout.getVirtualAbsoluteCellSize },
 		{ name = "GridAbsoluteContentSize", fn = VirtualGridLayout.getVirtualAbsoluteContentSize },
 
-		{ name = "StrokeEnabled", fn = VirtualStroke.setVirtualEnabled },
-		{ name = "StrokeApplyMode", fn = VirtualStroke.setVirtualApplyMode },
-		{ name = "StrokeBorderOffset", fn = VirtualStroke.setVirtualBorderOffset },
-		{ name = "StrokeBorderPosition", fn = VirtualStroke.setVirtualBorderPosition },
-		{ name = "StrokeColor", fn = VirtualStroke.setVirtualColor },
-		{ name = "StrokeLineJoinMode", fn = VirtualStroke.setVirtualLineJoinMode },
-		{ name = "StrokeSizingMode", fn = VirtualStroke.setVirtualSizingMode },
-		{ name = "StrokeThickness", fn = VirtualStroke.setVirtualThickness },
-		{ name = "StrokeTransparency", fn = VirtualStroke.setVirtualTransparency },
+		{ name = "StrokeEnabled", fn = VirtualStroke.getVirtualEnabled },
+		{ name = "StrokeApplyMode", fn = VirtualStroke.getVirtualApplyMode },
+		{ name = "StrokeBorderOffset", fn = VirtualStroke.getVirtualBorderOffset },
+		{ name = "StrokeBorderPosition", fn = VirtualStroke.getVirtualBorderPosition },
+		{ name = "StrokeColor", fn = VirtualStroke.getVirtualColor },
+		{ name = "StrokeLineJoinMode", fn = VirtualStroke.getVirtualLineJoinMode },
+		{ name = "StrokeSizingMode", fn = VirtualStroke.getVirtualSizingMode },
+		{ name = "StrokeThickness", fn = VirtualStroke.getVirtualThickness },
+		{ name = "StrokeTransparency", fn = VirtualStroke.getVirtualTransparency },
 	},
 	virtualWriteable = {
 		{ name = "CornerRadius", fn = VirtualCorners.setVirtual },
@@ -209,15 +210,15 @@ Frame.properties = {
 		{ name = "GridStartCorner", fn = VirtualGridLayout.setVirtualStartCorner },
 		{ name = "GridVerticalAlignment", fn = VirtualGridLayout.setVirtualVerticalAlignment },
 
-		{ name = "StrokeEnabled", fn = VirtualStroke.getVirtualEnabled },
-		{ name = "StrokeApplyMode", fn = VirtualStroke.getVirtualApplyMode },
-		{ name = "StrokeBorderOffset", fn = VirtualStroke.getVirtualBorderOffset },
-		{ name = "StrokeBorderPosition", fn = VirtualStroke.getVirtualBorderPosition },
-		{ name = "StrokeColor", fn = VirtualStroke.getVirtualColor },
-		{ name = "StrokeLineJoinMode", fn = VirtualStroke.getVirtualLineJoinMode },
-		{ name = "StrokeSizingMode", fn = VirtualStroke.getVirtualSizingMode },
-		{ name = "StrokeThickness", fn = VirtualStroke.getVirtualThickness },
-		{ name = "StrokeTransparency", fn = VirtualStroke.getVirtualTransparency },
+		{ name = "StrokeEnabled", fn = VirtualStroke.setVirtualEnabled },
+		{ name = "StrokeApplyMode", fn = VirtualStroke.setVirtualApplyMode },
+		{ name = "StrokeBorderOffset", fn = VirtualStroke.setVirtualBorderOffset },
+		{ name = "StrokeBorderPosition", fn = VirtualStroke.setVirtualBorderPosition },
+		{ name = "StrokeColor", fn = VirtualStroke.setVirtualColor },
+		{ name = "StrokeLineJoinMode", fn = VirtualStroke.setVirtualLineJoinMode },
+		{ name = "StrokeSizingMode", fn = VirtualStroke.setVirtualSizingMode },
+		{ name = "StrokeThickness", fn = VirtualStroke.setVirtualThickness },
+		{ name = "StrokeTransparency", fn = VirtualStroke.setVirtualTransparency },
 	},
 }
 

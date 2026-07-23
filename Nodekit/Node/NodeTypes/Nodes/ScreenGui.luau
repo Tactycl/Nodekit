@@ -6,6 +6,10 @@ local ScreenGui = {}
 ScreenGui.rblxClass = "ScreenGui"
 ScreenGui.initParams = {}
 
+ScreenGui.create = function(self)
+	self:addType("ScreenGui")
+end
+
 ScreenGui.properties = {
 	readable = {
 		"ClipToDeviceSafeArea",

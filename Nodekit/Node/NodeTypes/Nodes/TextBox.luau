@@ -35,6 +35,8 @@ TextBox.create = function(self)
 	self._instance.Focused:Connect(function()
 		safeCall(self, "onFocused")
 	end)
+
+	self:addType("TextBox")
 end
 
 TextBox.properties = {
@@ -198,15 +200,15 @@ TextBox.properties = {
 		{ name = "MinSize", fn = VirtualSizeConstraint.getVirtualMinSize },
 		{ name = "MaxSize", fn = VirtualSizeConstraint.getVirtualMaxSize },
 
-		{ name = "StrokeEnabled", fn = VirtualStroke.setVirtualEnabled },
-		{ name = "StrokeApplyMode", fn = VirtualStroke.setVirtualApplyMode },
-		{ name = "StrokeBorderOffset", fn = VirtualStroke.setVirtualBorderOffset },
-		{ name = "StrokeBorderPosition", fn = VirtualStroke.setVirtualBorderPosition },
-		{ name = "StrokeColor", fn = VirtualStroke.setVirtualColor },
-		{ name = "StrokeLineJoinMode", fn = VirtualStroke.setVirtualLineJoinMode },
-		{ name = "StrokeSizingMode", fn = VirtualStroke.setVirtualSizingMode },
-		{ name = "StrokeThickness", fn = VirtualStroke.setVirtualThickness },
-		{ name = "StrokeTransparency", fn = VirtualStroke.setVirtualTransparency },
+		{ name = "StrokeEnabled", fn = VirtualStroke.getVirtualEnabled },
+		{ name = "StrokeApplyMode", fn = VirtualStroke.getVirtualApplyMode },
+		{ name = "StrokeBorderOffset", fn = VirtualStroke.getVirtualBorderOffset },
+		{ name = "StrokeBorderPosition", fn = VirtualStroke.getVirtualBorderPosition },
+		{ name = "StrokeColor", fn = VirtualStroke.getVirtualColor },
+		{ name = "StrokeLineJoinMode", fn = VirtualStroke.getVirtualLineJoinMode },
+		{ name = "StrokeSizingMode", fn = VirtualStroke.getVirtualSizingMode },
+		{ name = "StrokeThickness", fn = VirtualStroke.getVirtualThickness },
+		{ name = "StrokeTransparency", fn = VirtualStroke.getVirtualTransparency },
 	},
 	virtualWriteable = {
 		{ name = "CornerRadius", fn = VirtualCorners.setVirtual },
@@ -242,15 +244,15 @@ TextBox.properties = {
 		{ name = "MinSize", fn = VirtualSizeConstraint.setVirtualMinSize },
 		{ name = "MaxSize", fn = VirtualSizeConstraint.setVirtualMaxSize },
 
-		{ name = "StrokeEnabled", fn = VirtualStroke.getVirtualEnabled },
-		{ name = "StrokeApplyMode", fn = VirtualStroke.getVirtualApplyMode },
-		{ name = "StrokeBorderOffset", fn = VirtualStroke.getVirtualBorderOffset },
-		{ name = "StrokeBorderPosition", fn = VirtualStroke.getVirtualBorderPosition },
-		{ name = "StrokeColor", fn = VirtualStroke.getVirtualColor },
-		{ name = "StrokeLineJoinMode", fn = VirtualStroke.getVirtualLineJoinMode },
-		{ name = "StrokeSizingMode", fn = VirtualStroke.getVirtualSizingMode },
-		{ name = "StrokeThickness", fn = VirtualStroke.getVirtualThickness },
-		{ name = "StrokeTransparency", fn = VirtualStroke.getVirtualTransparency },
+		{ name = "StrokeEnabled", fn = VirtualStroke.setVirtualEnabled },
+		{ name = "StrokeApplyMode", fn = VirtualStroke.setVirtualApplyMode },
+		{ name = "StrokeBorderOffset", fn = VirtualStroke.setVirtualBorderOffset },
+		{ name = "StrokeBorderPosition", fn = VirtualStroke.setVirtualBorderPosition },
+		{ name = "StrokeColor", fn = VirtualStroke.setVirtualColor },
+		{ name = "StrokeLineJoinMode", fn = VirtualStroke.setVirtualLineJoinMode },
+		{ name = "StrokeSizingMode", fn = VirtualStroke.setVirtualSizingMode },
+		{ name = "StrokeThickness", fn = VirtualStroke.setVirtualThickness },
+		{ name = "StrokeTransparency", fn = VirtualStroke.setVirtualTransparency },
 	},
 }
 
