@@ -5,37 +5,6 @@ const Event = require("./Event")
 local EventDispatcher = {}
 EventDispatcher.__index = EventDispatcher
 
-local function isGuiObject(inst)
-	return inst ~= nil and inst:IsA("GuiObject")
-end
-
-local function isVisibleInHierarchy(node)
-	while node do
-		local inst = node._instance
-		if inst and inst:IsA("GuiObject") then
-			if inst.Visible ~= true then
-				return false
-			end
-		end
-		node = node._parent
-	end
-	return true
-end
-
-local function isPointerTarget(node)
-	local inst = node and node._instance
-	if not isGuiObject(inst) then
-		return false
-	end
-	if inst.Active ~= true then
-		return false
-	end
-	if not isVisibleInHierarchy(node) then
-		return false
-	end
-	return true
-end
-
 local function pointInGui(inst, p)
 	local pos = inst.AbsolutePosition
 	local size = inst.AbsoluteSize
@@ -63,14 +32,8 @@ end
 
 local function isBlockingLayer(node)
 	return node
-		and node.isBlockingEventPropagation
-		and typeof(node.isBlockingEventPropagation) == "function"
+		and type(node.isBlockingEventPropagation) == "function"
 		and node:isBlockingEventPropagation() == true
-end
-
-local function canCullByParentBounds(node)
-	local inst = node and node._instance
-	return inst and inst:IsA("GuiObject") and inst.ClipsDescendants == true
 end
 
 local function getRootNode(self)
@@ -83,19 +46,23 @@ local function handleNode(self, node, event)
 		return
 	end
 
+	debug.profilebegin("EventDispatcher::handleNode")
+
 	if isPointerEventType(event.type) then
-		if typeof(node._onPointerEvent) == "function" then
+		if type(node._onPointerEvent) == "function" then
 			node:_onPointerEvent(event)
 		end
+		debug.profileend()
 		return
 	end
 
 	if node._dispatchEvent then
 		node:_dispatchEvent(event)
 		
-	elseif typeof(node.onEvent) == "function" then
+	elseif type(node.onEvent) == "function" then
 		node:onEvent(event)
 	end
+	debug.profileend()
 end
 
 local function dispatchDirect(self, node, event)
@@ -106,37 +73,45 @@ local function dispatchDirect(self, node, event)
 end
 
 local function findTopmostAt(root, pos)
+	debug.profilebegin("EventDispatcher::findTopmostAt")
 	local function walk(node)
-		local renderList = node:getRenderList()
-		if renderList then
-			if canCullByParentBounds(node) then
-				local inst = node._instance
-				if inst and inst:IsA("GuiObject") and not pointInGui(inst, pos) then
-					return nil
-				end
-			end
+		local inst = node._instance
 
-			for i = 1, #renderList do
-				local child = renderList[i]
-				local hit = walk(child)
-				if hit then
-					return hit
-				end
-				
-				if isBlockingLayer(child) then
-					return nil
-				end
+		local isGuiObject = inst:IsA("GuiObject")
+		if isGuiObject and not inst.Visible then
+			return nil
+		end
+
+		local _cachedIsInGui = nil
+
+		if isGuiObject and (inst.ClipsDescendants or node:isA("CanvasGroup")) then
+			_cachedIsInGui = pointInGui(inst, pos)
+			if isGuiObject and not _cachedIsInGui then
+				return nil
 			end
 		end
 
-		if isPointerTarget(node) and pointInGui(node._instance, pos) then
+		for _, child in node:getRenderList() do
+			local hit = walk(child)
+			if hit then
+				return hit
+			end
+
+			if isBlockingLayer(child) then
+				return nil
+			end
+		end
+
+		if isGuiObject and inst.Active and ((_cachedIsInGui ~= nil and _cachedIsInGui == true) or pointInGui(inst, pos)) then
 			return node
 		end
 
 		return nil
 	end
 
-	return root and walk(root) or nil
+	local res = root and walk(root) or nil
+	debug.profileend()
+	return res
 end
 
 local function resolveInputPosition(self, input)
@@ -148,7 +123,7 @@ end
 
 local function makePayload(input, processed, pos, wasButtonPressed, pointerId)
 	local wasTyping = UserInputService:GetFocusedTextBox() ~= nil
-	local wasProcessed = wasButtonPressed == true or wasTyping
+	local wasProcessed = processed == true or wasButtonPressed == true or wasTyping
 	return {
 		input = input,
 		gameProcessed = processed,
@@ -160,14 +135,7 @@ local function makePayload(input, processed, pos, wasButtonPressed, pointerId)
 	}
 end
 
-local function updateHover(self, pointerId, pos)
-	local root = getRootNode(self)
-	if not root then
-		return false
-	end
-
-	local dispatched = false
-	local hit = findTopmostAt(root, pos)
+local function updateHover(self, pointerId, pos, hit)
 	local prev = self._hoverNodes[pointerId]
 
 	if hit == prev then
@@ -180,9 +148,10 @@ local function updateHover(self, pointerId, pos)
 					pointerId = pointerId,
 				})
 			)
-			dispatched = true
+			return true
 		end
-		return dispatched
+
+		return false
 	end
 
 	self._hoverNodes[pointerId] = hit
@@ -196,7 +165,6 @@ local function updateHover(self, pointerId, pos)
 				pointerId = pointerId,
 			})
 		)
-		dispatched = true
 	end
 
 	if hit then
@@ -208,6 +176,7 @@ local function updateHover(self, pointerId, pos)
 				pointerId = pointerId,
 			})
 		)
+
 		dispatchDirect(
 			self,
 			hit,
@@ -216,32 +185,9 @@ local function updateHover(self, pointerId, pos)
 				pointerId = pointerId,
 			})
 		)
-		dispatched = true
 	end
 
-	return dispatched
-end
-
-local function dispatchWheel(self, pos, delta)
-	local root = getRootNode(self)
-	if not root then
-		return false
-	end
-
-	local hit = findTopmostAt(root, pos)
-	if hit then
-		dispatchDirect(
-			self,
-			hit,
-			Event:create("PointerWheel", {
-				position = pos,
-				delta = delta,
-			})
-		)
-		return true
-	end
-
-	return false
+	return prev ~= nil or hit ~= nil
 end
 
 local function dispatchUpTree(self, root, event, ignoreRoot)
@@ -249,20 +195,24 @@ local function dispatchUpTree(self, root, event, ignoreRoot)
 		return event
 	end
 
+	debug.profilebegin("EventDispatcher::dispatchUpTree")
+
 	local function walk(node)
-		local renderList = node:getRenderList()
-		if renderList then
-			for _, childNode in renderList do
-				if walk(childNode) then
-					return true
-				end
+		local inst = node._instance
+		if inst:IsA("GuiObject") and not inst.Visible then
+			return false
+		end
+
+		for _, childNode in node:getRenderList() do
+			if walk(childNode) then
+				return true
 			end
 		end
 
 		if not ignoreRoot or node ~= root then
 			handleNode(self, node, event)
 
-			if typeof(event.isConsumed) == "function" and event:isConsumed() then
+			if event._isConsumed then
 				return true
 			end
 
@@ -275,6 +225,7 @@ local function dispatchUpTree(self, root, event, ignoreRoot)
 	end
 
 	walk(root)
+	debug.profileend()
 	return event
 end
 
@@ -302,14 +253,15 @@ function EventDispatcher:bindUserInput()
 
 		local pointerId = getPointerId(input)
 		local pos = resolveInputPosition(self, input)
-		if input.UserInputType ~= Enum.UserInputType.Touch then
-			updateHover(self, pointerId, pos)
-		end
 
 		local root = getRootNode(self)
 		local hit = root and findTopmostAt(root, pos)
-		local wasButtonPressed = false
 
+		if input.UserInputType ~= Enum.UserInputType.Touch then
+			updateHover(self, pointerId, pos, hit)
+		end
+
+		local wasButtonPressed = false
 		if isPressInput(input) then
 			self._pressNodes[pointerId] = hit
 			if hit then
@@ -330,37 +282,71 @@ function EventDispatcher:bindUserInput()
 			return
 		end
 
+		local inputType = input.UserInputType
+
+		local isMouseMovement = inputType == Enum.UserInputType.MouseMovement
+		local isTouchMovement = inputType == Enum.UserInputType.Touch
+		local isMouseWheel = inputType == Enum.UserInputType.MouseWheel
+
+		if not isMouseMovement and not isTouchMovement and not isMouseWheel then
+			local root = getRootNode(self)
+
+			dispatchUpTree(
+				self,
+				root,
+				Event:create("InputChanged", makePayload(input, gp, nil, false, getPointerId(input))),
+				true
+			)
+
+			return
+		end
+
 		local pointerId = getPointerId(input)
 		local pos = resolveInputPosition(self, input)
+		local root = getRootNode(self)
 
+		local hit = root and findTopmostAt(root, pos)
 		local pointerSent = false
 
-		if input.UserInputType == Enum.UserInputType.MouseWheel then
-			local d = input.Position and input.Position.Z or 0
-			if d ~= 0 and dispatchWheel(self, pos, d) then
+		if isMouseWheel then
+			local delta = input.Position.Z
+
+			if delta ~= 0 and hit then
+				dispatchDirect(
+					self,
+					hit,
+					Event:create("PointerWheel", {
+						input = input,
+						gameProcessed = gp,
+						position = pos,
+						delta = delta,
+						pointerId = pointerId,
+					})
+				)
+
 				pointerSent = true
 			end
 
 		else
-			if input.UserInputType ~= Enum.UserInputType.Touch then
-				if updateHover(self, pointerId, pos) then
-					pointerSent = true
-				end
+			if isMouseMovement then
+				pointerSent = updateHover(self, pointerId, pos, hit)
+			end
+
+			if hit then
+				dispatchDirect(self, hit, Event:create("PointerChanged", makePayload(input, gp, pos, false, pointerId)))
+
+				pointerSent = true
 			end
 		end
 
-		local root = getRootNode(self)
-		local hit = root and findTopmostAt(root, pos)
-		if hit then
-			dispatchDirect(
+		if not pointerSent then
+			dispatchUpTree(
 				self,
-				hit,
-				Event:create("PointerChanged", makePayload(input, gp, pos, false, pointerId))
+				root,
+				Event:create("InputChanged", makePayload(input, gp, pos, false, pointerId)),
+				true
 			)
-			pointerSent = true
 		end
-
-		dispatchUpTree(self, root, Event:create("InputChanged", makePayload(input, gp, pos, pointerSent, pointerId)), true)
 	end)
 
 	self._conns[#self._conns + 1] = UserInputService.InputEnded:Connect(function(input, gp)
@@ -369,15 +355,17 @@ function EventDispatcher:bindUserInput()
 		end
 
 		local pointerId = getPointerId(input)
-		local root = getRootNode(self)
 		local pos = resolveInputPosition(self, input)
+
+		local root = getRootNode(self)
+		local hit = root and findTopmostAt(root, pos)
+
 		if input.UserInputType ~= Enum.UserInputType.Touch then
-			updateHover(self, pointerId, pos)
+			updateHover(self, pointerId, pos, hit)
 		end
 
 		local wasButtonPRessed = false
 		if isPressInput(input) then
-			local hit = root and findTopmostAt(root, pos)
 			local pressed = self._pressNodes[pointerId]
 
 			if hit then
