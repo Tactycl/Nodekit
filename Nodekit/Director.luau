@@ -14,7 +14,22 @@ const exitTransitionDidStartSubtree = require("./util/exitTransitionDidStartSubt
 const REFERENCE_SIZE_PIXELS = 1080
 
 local Director = {}
-Director.__index = Director
+Director.__index = function(self, key)
+	local value = Director[key]
+	if value ~= nil then
+		return value
+	end
+
+	local froot = rawget(self, "froot")
+	if froot then
+		local frootValue = froot[key]
+		if frootValue ~= nil then
+			return frootValue
+		end
+	end
+
+	return nil
+end
 
 local _instance
 
@@ -361,17 +376,6 @@ end
 
 function Director:getNumberOfRunningScenes()
 	return #self.sceneStack
-end
-
--- For global persistent layers
-function Director:addChild(childNode, zIndex: number?)
-	self.froot:addChild(childNode, zIndex)
-	return self
-end
-
-function Director:add(...)
-	self.froot:add(...)
-	return self
 end
 
 return Director
