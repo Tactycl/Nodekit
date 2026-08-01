@@ -5,6 +5,7 @@ const safeCall = require("./util/safeCall")
 const Node = require("./Node")
 
 local Layer = Node:inherit()
+Layer._BASE_TYPE = "Layer"
 
 function Layer:inherit()
 	local newClass = {}

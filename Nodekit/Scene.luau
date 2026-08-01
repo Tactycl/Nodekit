@@ -1,6 +1,7 @@
 const Node = require("./Node")
 
 local Scene = Node:inherit()
+Scene._BASE_TYPE = "Scene"
 Scene.Type = table.freeze({
 	DEFAULT = "DEFAULT",
 	TRANSITION = "TRANSITION",
