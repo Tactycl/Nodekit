@@ -1,4 +1,5 @@
 const CollectionService = game:GetService("CollectionService")
+const GuiService = game:GetService("GuiService")
 const UserInputService = game:GetService("UserInputService")
 
 const enterSubtree = require("./util/enterSubtree")
@@ -246,7 +247,7 @@ function Node:getCursorPosition()
 	if typeof(self.getAbsolutePosition) ~= "function" then
 		return cursorPos
 	end
-	return cursorPos - self:getAbsolutePosition()
+	return cursorPos - self:getAbsolutePosition() - GuiService:GetGuiInset()
 end
 
 function Node:getCursorPositionScaled()
