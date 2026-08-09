@@ -213,18 +213,49 @@ end
 function Node:inherit()
 	local newClass = {}
 
+	local parentIndex = self.__index
+
 	newClass.__index = function(obj, key)
-		local v = rawget(newClass, key)
-		if v ~= nil then
-			return v
+		local value = rawget(newClass, key)
+		if value ~= nil then
+			return value
 		end
 
-		return self.__index(obj, key)
+		value = parentIndex(obj, key)
+
+		if value ~= nil then
+			return value
+		end
+
+		local objectKey = rawget(newClass, "_delegatedObjectKey")
+		if objectKey then
+			local delegate = rawget(obj, objectKey)
+			if delegate then
+				local delegated = delegate[key]
+				if type(delegated) == "function" then
+					return function(_, ...)
+						local result = delegated(delegate, ...)
+						if result == delegate then
+							return obj
+						end
+						return result
+					end
+				end
+			end
+		end
+
+		return nil
 	end
 
-	setmetatable(newClass, { __index = self })
+	setmetatable(newClass, {
+		__index = self,
+	})
 
 	return newClass
+end
+
+function Node:delegate(objectKey)
+	self._delegatedObjectKey = objectKey
 end
 
 function Node:_trackAction(a)
