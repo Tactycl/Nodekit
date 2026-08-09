@@ -59,7 +59,7 @@ Gradient.getVirtualOffset = function(self)
 	if self._gradient then
 		return self._gradient.Offset
 	end
-	return Vector2.new(0, 0)
+	return Vector2.zero
 end
 
 Gradient.setVirtualRotation = function(self, rotation)

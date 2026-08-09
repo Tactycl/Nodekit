@@ -283,7 +283,7 @@ end
 
 function Node:getCursorPositionScaled()
 	if typeof(self.getAbsoluteSize) ~= "function" then
-		return Vector2.new(1, 1)
+		return Vector2.one
 	end
 	return self:getCursorPosition() / self:getAbsoluteSize()
 end

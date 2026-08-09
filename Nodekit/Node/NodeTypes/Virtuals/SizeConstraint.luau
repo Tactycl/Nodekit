@@ -28,7 +28,7 @@ SizeConstraint.getVirtualMinSize = function(self)
 	if c then
 		return c.MinSize
 	end
-	return Vector2.new(0, 0)
+	return Vector2.zero
 end
 
 SizeConstraint.setVirtualMaxSize = function(self, v)
@@ -62,7 +62,7 @@ SizeConstraint.setVirtualMinSize = function(self, v)
 			destroyConstraint(self)
 			return
 		end
-		v = Vector2.new(0, 0)
+		v = Vector2.zero
 	end
 
 	if typeof(v) ~= "Vector2" then
