@@ -5,6 +5,8 @@ const VirtualAspectRatio = require("../Virtuals/AspectRatio")
 const VirtualFlexItem = require("../Virtuals/FlexItem")
 const VirtualGradient = require("../Virtuals/Gradient")
 const VirtualSizeConstraint = require("../Virtuals/SizeConstraint")
+const VirtualListLayout = require("../Virtuals/ListLayout")
+const VirtualGridLayout = require("../Virtuals/GridLayout")
 const VirtualStroke = require("../Virtuals/Stroke")
 
 const onPointerEvent = require("../Funcs/onPointerEvent")
@@ -147,6 +149,29 @@ Image.properties = {
 		{ name = "MinSize", fn = VirtualSizeConstraint.getVirtualMinSize },
 		{ name = "MaxSize", fn = VirtualSizeConstraint.getVirtualMaxSize },
 
+		{ name = "ListLayoutEnabled", fn = VirtualListLayout.getVirtualEnabled },
+		{ name = "ListFillDirection", fn = VirtualListLayout.getVirtualFillDirection },
+		{ name = "ListHorizontalAlignment", fn = VirtualListLayout.getVirtualHorizontalAlignment },
+		{ name = "ListHorizontalFlex", fn = VirtualListLayout.getVirtualHorizontalFlex },
+		{ name = "ListItemLineAlignment", fn = VirtualListLayout.getVirtualItemLineAlignment },
+		{ name = "ListPadding", fn = VirtualListLayout.getVirtualPadding },
+		{ name = "ListVerticalAlignment", fn = VirtualListLayout.getVirtualVerticalAlignment },
+		{ name = "ListVerticalFlex", fn = VirtualListLayout.getVirtualVerticalFlex },
+		{ name = "ListWraps", fn = VirtualListLayout.getVirtualWraps },
+		{ name = "ListAbsoluteContentSize", fn = VirtualListLayout.getVirtualAbsoluteContentSize },
+
+		{ name = "GridLayoutEnabled", fn = VirtualGridLayout.getVirtualEnabled },
+		{ name = "GridCellSize", fn = VirtualGridLayout.getVirtualCellSize },
+		{ name = "GridCellPadding", fn = VirtualGridLayout.getVirtualCellPadding },
+		{ name = "GridFillDirection", fn = VirtualGridLayout.getVirtualFillDirection },
+		{ name = "GridFillDirectionMaxCells", fn = VirtualGridLayout.getVirtualFillDirectionMaxCells },
+		{ name = "GridHorizontalAlignment", fn = VirtualGridLayout.getVirtualHorizontalAlignment },
+		{ name = "GridStartCorner", fn = VirtualGridLayout.getVirtualStartCorner },
+		{ name = "GridVerticalAlignment", fn = VirtualGridLayout.getVirtualVerticalAlignment },
+		{ name = "GridAbsoluteCellCount", fn = VirtualGridLayout.getVirtualAbsoluteCellCount },
+		{ name = "GridAbsoluteCellSize", fn = VirtualGridLayout.getVirtualAbsoluteCellSize },
+		{ name = "GridAbsoluteContentSize", fn = VirtualGridLayout.getVirtualAbsoluteContentSize },
+
 		{ name = "StrokeEnabled", fn = VirtualStroke.getVirtualEnabled },
 		{ name = "StrokeApplyMode", fn = VirtualStroke.getVirtualApplyMode },
 		{ name = "StrokeBorderOffset", fn = VirtualStroke.getVirtualBorderOffset },
@@ -187,6 +212,25 @@ Image.properties = {
 
 		{ name = "MinSize", fn = VirtualSizeConstraint.setVirtualMinSize },
 		{ name = "MaxSize", fn = VirtualSizeConstraint.setVirtualMaxSize },
+
+		{ name = "ListLayoutEnabled", fn = VirtualListLayout.setVirtualEnabled },
+		{ name = "ListFillDirection", fn = VirtualListLayout.setVirtualFillDirection },
+		{ name = "ListHorizontalAlignment", fn = VirtualListLayout.setVirtualHorizontalAlignment },
+		{ name = "ListHorizontalFlex", fn = VirtualListLayout.setVirtualHorizontalFlex },
+		{ name = "ListItemLineAlignment", fn = VirtualListLayout.setVirtualItemLineAlignment },
+		{ name = "ListPadding", fn = VirtualListLayout.setVirtualPadding },
+		{ name = "ListVerticalAlignment", fn = VirtualListLayout.setVirtualVerticalAlignment },
+		{ name = "ListVerticalFlex", fn = VirtualListLayout.setVirtualVerticalFlex },
+		{ name = "ListWraps", fn = VirtualListLayout.setVirtualWraps },
+
+		{ name = "GridLayoutEnabled", fn = VirtualGridLayout.setVirtualEnabled },
+		{ name = "GridCellSize", fn = VirtualGridLayout.setVirtualCellSize },
+		{ name = "GridCellPadding", fn = VirtualGridLayout.setVirtualCellPadding },
+		{ name = "GridFillDirection", fn = VirtualGridLayout.setVirtualFillDirection },
+		{ name = "GridFillDirectionMaxCells", fn = VirtualGridLayout.setVirtualFillDirectionMaxCells },
+		{ name = "GridHorizontalAlignment", fn = VirtualGridLayout.setVirtualHorizontalAlignment },
+		{ name = "GridStartCorner", fn = VirtualGridLayout.setVirtualStartCorner },
+		{ name = "GridVerticalAlignment", fn = VirtualGridLayout.setVirtualVerticalAlignment },
 
 		{ name = "StrokeEnabled", fn = VirtualStroke.setVirtualEnabled },
 		{ name = "StrokeApplyMode", fn = VirtualStroke.setVirtualApplyMode },
