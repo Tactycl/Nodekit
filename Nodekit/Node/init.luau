@@ -350,6 +350,14 @@ function Node:getId()
 	return self._id
 end
 
+function Node:getIndex()
+	local rblxInstance = self._instance
+	if rblxInstance and rblxInstance:IsA("GuiObject") then
+		return rblxInstance.LayoutOrder
+	end
+	return 0
+end
+
 function Node:getName()
 	return getName(self)
 end
