@@ -140,6 +140,10 @@ function Director:getGuiInset()
 	return GuiService:GetGuiInset()
 end
 
+function Director:isTransitionInProgress()
+	return self._transitionInProgress
+end
+
 function Director:runWithScene(scene)
 	self.sceneStack = { scene }
 	self.runningScene = scene
