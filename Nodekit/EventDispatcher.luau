@@ -320,7 +320,7 @@ function EventDispatcher:bindUserInput()
 			end
 
 		else
-			if isMouseMovement then
+			if isMouseMovement or isTouchMovement then
 				pointerSent = updateHover(self, input, pos, hit)
 			end
 
