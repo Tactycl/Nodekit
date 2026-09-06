@@ -162,11 +162,37 @@ local function attachToParent(childNode, parentNode, zIndex: number?)
 	walk(childNode)
 end
 
+local function resolveDelegate(delegate, key, visited)
+	if type(delegate) == "table" then
+		local delegateClass = getmetatable(delegate)
+		local resolver = delegateClass and rawget(delegateClass, "_resolveIndex")
+
+		if resolver then
+			visited = visited or {}
+			if visited[delegate] then
+				return nil
+			end
+
+			visited[delegate] = true
+			return resolver(delegate, key, visited)
+		end
+	end
+	return delegate[key]
+end
+
 local Node = {}
 Node._BASE_TYPE = "Node"
 Node.__index = function(self, key)
+	local value = Node._resolveIndex(self, key)
+	if value ~= nil then
+		return value
+	end
+	return Node._indexError(self, key)
+end
+
+function Node:_resolveIndex(key, visited)
 	local method = rawget(Node, key)
-	if method then
+	if method ~= nil then
 		return method
 	end
 
@@ -174,33 +200,45 @@ Node.__index = function(self, key)
 		return nil
 	end
 
-	if key:sub(1, 3) == "set" then
-		local propName = key:sub(4)
+	local prefix = key:sub(1, 3)
+	local propName = key:sub(4)
+
+	if prefix == "set" then
 		if self._metaWriteable[propName] then
 			return function(self, v)
-				if typeof(self._instance[propName]) == typeof(v) then
-					self._instance[propName] = v
-				end
-				return self
-			end
+				local expectedType = typeof(self._instance[propName])
+				local receivedType = typeof(v)
 
-		elseif self._metaVirtualWriteable[propName] then
-			return function(self, v)
-				self._metaVirtualWriteable[propName](self, v)
-				safeCall(self, "onChanged", propName, v)
-				safeCall(self, ("on%sChanged"):format(propName), v)
+				assert(
+					expectedType == receivedType,
+					`NodeKit: set{propName} expected {expectedType}, received {receivedType}`
+				)
+
+				self._instance[propName] = v
 				return self
 			end
 		end
 
-	elseif key:sub(1, 3) == "get" then
-		local propName = key:sub(4)
+		if self._metaVirtualWriteable[propName] then
+			return function(self, v)
+				self._metaVirtualWriteable[propName](self, v)
+
+				safeCall(self, "onChanged", propName, v)
+				safeCall(self, ("on%sChanged"):format(propName), v)
+
+				return self
+			end
+		end
+	end
+
+	if prefix == "get" then
 		if self._metaReadable[propName] then
 			return function(self)
 				return self._instance[propName]
 			end
+		end
 
-		elseif self._metaVirtualReadable[propName] then
+		if self._metaVirtualReadable[propName] then
 			return function(self)
 				return self._metaVirtualReadable[propName](self)
 			end
@@ -210,19 +248,32 @@ Node.__index = function(self, key)
 	return nil
 end
 
+function Node:_indexError(key)
+	if typeof(key) ~= "string" then
+		return nil
+	end
+
+	local prefix = key:sub(1, 3)
+	if prefix == "set" or prefix == "get" then
+		local propName = key:sub(4)
+		error(`NodeKit: {self._types[#self._types]} has no property called "{propName}"`, 2)
+	end
+	return nil
+end
+
 function Node:inherit()
 	local newClass = {}
 
-	local parentIndex = self.__index
+	local parentResolver = rawget(self, "_resolveIndex")
+	assert(parentResolver ~= nil, "NodeKit: attempted to inherit from a class without an index resolver")
 
-	newClass.__index = function(obj, key)
+	newClass._resolveIndex = function(obj, key, visited)
 		local value = rawget(newClass, key)
 		if value ~= nil then
 			return value
 		end
 
-		value = parentIndex(obj, key)
-
+		value = parentResolver(obj, key, visited)
 		if value ~= nil then
 			return value
 		end
@@ -230,21 +281,35 @@ function Node:inherit()
 		local objectKey = rawget(newClass, "_delegatedObjectKey")
 		if objectKey then
 			local delegate = rawget(obj, objectKey)
-			if delegate then
-				local delegated = delegate[key]
-				if type(delegated) == "function" then
-					return function(_, ...)
-						local result = delegated(delegate, ...)
-						if result == delegate then
-							return obj
+			if delegate ~= nil then
+				local delegated = resolveDelegate(delegate, key, visited)
+				if delegated ~= nil then
+					if type(delegated) == "function" then
+						return function(_, ...)
+							local result = delegated(delegate, ...)
+
+							if result == delegate then
+								return obj
+							end
+
+							return result
 						end
-						return result
 					end
+
+					return delegated
 				end
 			end
 		end
 
 		return nil
+	end
+
+	newClass.__index = function(obj, key)
+		local value = newClass._resolveIndex(obj, key, {})
+		if value ~= nil then
+			return value
+		end
+		return Node._indexError(obj, key)
 	end
 
 	setmetatable(newClass, {
