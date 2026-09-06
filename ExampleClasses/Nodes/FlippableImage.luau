@@ -6,6 +6,12 @@ local Node = Nodekit.Node
 
 local FlippableImage = Node:inherit()
 
+export type Image = {
+  image: string,
+  width: number,
+  height: number
+}
+
 local function updateImageRect(self)
   local instance = self:getRblxInstance()
 
@@ -18,7 +24,7 @@ local function updateImageRect(self)
   instance.ImageRectSize = imageSize * Vector2.new(-(flipX - 0.5) * 2, -(flipY - 0.5) * 2)
 end
 
-function FlippableImage:create(image: { image: string, width: number, height: number }?)
+function FlippableImage:create(image: Image?)
   local inst = setmetatable(Node.Image:create(image and image.image), FlippableImage)
   
   inst._width = image and image.width or 0
@@ -33,12 +39,12 @@ function FlippableImage:create(image: { image: string, width: number, height: nu
   return inst
 end
 
-function FlippableImage:setImage(image: { image: string, width: number, height: number })
-  if typeof(image) == "table" and typeof(image.image) == "string" and typeof(image.width) == "number" and typeof(image.height) == "number" then
+function FlippableImage:setImage(image: Image?)
+  if image == nil or (typeof(image) == "table" and typeof(image.image) == "string" and typeof(image.width) == "number" and typeof(image.height) == "number") then
     local instance = self:getRblxInstance()
-    instance.Image = image.image
-    self._width = image.width
-    self._height = image.height
+    instance.Image = image and image.image or ""
+    self._width = image and image.width or 0
+    self._height = image and image.height or 0
   end
   return self
 end
