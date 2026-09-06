@@ -63,12 +63,4 @@ function Scene:initFailed()
 	return self._initFailed == true
 end
 
-function Scene:destroy()
-	self:clearAllChildren()
-	self:removeFromParent()
-	if self._instance then
-		self._instance:Destroy()
-	end
-end
-
 return Scene
